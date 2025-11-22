@@ -1,6 +1,5 @@
 import React from "react";
 import CaptchaWidget from "./components/CaptchaWidget";
-import "./styles/captcha.css";
 
 function App() {
   return (
