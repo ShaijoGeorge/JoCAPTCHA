@@ -1,22 +1,67 @@
-import React from "react";
+import React, { useState } from "react";
+import { verifyChallenge, BASE_URL } from "../../services/api";
 
-function ChallengeScreen({ setScreen }) {
-  return (
-    <div className="captcha-box">
-      <div className="captcha-header">
-        <span>JoCAPTCHA</span>
-        <span>v0.1.0</span>
-      </div>
+function ChallengeScreen({ challengeData, setScreen, setFailureReason}) {
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const startTime = Date.now();
 
-      <p>Description of challenge will go here...</p>
+    async function verify() {
+        if (selectedIndex === null) {
+            alert("Please select an image.");
+            return;
+        }
 
-      <div className="captcha-content-box">Challenge content</div>
+        const timeTaken = Date.now() - startTime;
 
-      <button className="captcha-btn" onClick={() => setScreen("success")}>
-        Verify (demo)
-      </button>
-    </div>
-  );
+        const result = await verifyChallenge({
+            challengeId: challengeData.challengeId,
+            answer: selectedIndex,
+            timeTaken: timeTaken
+        });
+
+        if (result.success) {
+            setScreen("success");
+        } else {
+            setFailureReason(result.reason);
+            setScreen("failure");
+        }
+    }
+
+    return (
+        <div className="captcha-box">
+            <div className="captcha-header">
+                <span>JoCAPTCHA</span>
+                <span>v0.1.0</span>
+            </div>
+
+            <p>{challengeData.prompt}</p>
+
+            <div className="captcha-content-box" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px" }}>
+                {
+                    challengeData.images.map((img, index) => (
+                        <img
+                            key={index}
+                            src={`${BASE_URL}${img}`}
+                            alt=""
+                            onClick={() => setSelectedIndex(index)}
+                            style={{
+                                width: "70px",
+                                height: "70px",
+                                border: selectedIndex === index ? "3px solid #2979ff" : "2px solid #ccc",
+                                borderRadius: "5px",
+                                cursor: "pointer",
+                                objectFit: "cover"
+                            }}
+                        />
+                    ))
+                }
+            </div>
+
+            <button className="captcha-btn" onClick={verify}>
+                Verify
+            </button>
+        </div>
+    );
 }
 
 export default ChallengeScreen;

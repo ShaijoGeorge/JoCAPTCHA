@@ -10,11 +10,24 @@ function CaptchaWidget() {
     const [failureReason, setFailureReason] = useState("");
 
     return (
-        <div className="captcha-widget">
-            {screen === "start" && <StartScreen setScreen={setScreen} />}
-            {screen === "challenge" && <ChallengeScreen setScreen={setScreen} challengeData={challengeData} />}
+        <div className="captcha-container">
+            {screen === "start" && (
+                <StartScreen setScreen={setScreen} setChallengeData={setChallengeData} />
+            )}
+
+            {screen === "challenge" && (
+                <ChallengeScreen
+                    challengeData={challengeData}
+                    setScreen={setScreen}
+                    setFailureReason={setFailureReason} 
+                /> 
+            )}
+
             {screen === "success" && <SuccessScreen setScreen={setScreen} />}
-            {screen === "failure" && <FailureScreen setScreen={setScreen} reason={failureReason} />}
+
+            {screen === "failure" && (
+                <FailureScreen setScreen={setScreen} reason={failureReason} />
+            )}
         </div>
     );
 }
