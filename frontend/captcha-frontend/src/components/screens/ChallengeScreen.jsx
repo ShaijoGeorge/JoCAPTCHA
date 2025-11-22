@@ -84,13 +84,17 @@ function ChallengeScreen({ challengeData, setScreen, setFailureReason}) {
                                 src={`${BASE_URL}${img}`}
                                 alt=""
                                 onClick={() => setSelectedIndex(index)}
-                                style={{
-                                    width: "70px",
-                                    height: "70px",
-                                    border: selectedIndex === index ? "3px solid #2979ff" : "2px solid #ccc",
-                                    borderRadius: "5px",
+                               style={{
+                                    width: "72px",
+                                    height: "72px",
+                                    border:
+                                        selectedIndex === index
+                                        ? "3px solid #2979ff"
+                                        : "2px solid #e2e2e2",
+                                    borderRadius: "6px",
                                     cursor: "pointer",
                                     objectFit: "cover",
+                                    transition: "0.15s ease-in-out",
                                     opacity: secondsLeft > 0 ? 1 : 0.5,
                                 }}
                             />

@@ -5,7 +5,7 @@ function FailureScreen({ setScreen, reason }) {
     <div className="captcha-box screen-fade">
         <div className="captcha-box">
             <div className="captcha-header">
-                <span>Custom CAPTCHA</span>
+                <span>JoCAPTCHA</span>
                 <span>v0.1.0</span>
             </div>
 
