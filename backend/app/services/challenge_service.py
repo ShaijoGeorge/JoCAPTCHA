@@ -1,6 +1,7 @@
 import uuid
 import random
 import json
+from datetime import datetime
 from pathlib import Path
 from app.redis_client import redis_client
 
@@ -35,3 +36,28 @@ def generate_odd_one_out_challenge():
     redis_client.setex(challenge_id, 120, json.dumps(challenge_data))
     
     return challenge_data
+
+def verify_challenge(challenge_id : str, user_answer: int, time_taken: int):
+    # Fetch challenge data from Redis
+    data = redis_client.get(challenge_id)
+
+    if not data:
+        return {"success": False, "reason": "Challenge expired or invalid."}
+
+    challenge = json.loads(data)
+
+    # Delete challenge immediately (one-time use)
+    redis_client.delete(challenge_id)
+
+    # Validate answer
+    correct_answer = challenge["answer"]
+
+    if user_answer != correct_answer:
+        return {"success": False, "reason": "Incorrect answer."}
+    
+    # Validate time (too slow = expired)
+    if time_taken > challenge.get("timeout", 20) * 1000:
+        return {"success": False, "reason": "Challenge timed out."}
+
+    # If everything is good:
+    return {"success": True, "reason": "Verification successful."}
