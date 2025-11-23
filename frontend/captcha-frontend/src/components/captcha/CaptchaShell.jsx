@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { UserCheck, Clock, ShieldCheck, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { generateChallenge, verifyChallenge, API_BASE } from "../../services/captchaApi";
 
@@ -7,6 +8,23 @@ export default function CaptchaShell() {
     const [challenge, setChallenge] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [startTime, setStartTime] = useState(null);
+    const [timeLeft, setTimeLeft] = useState(null);
+
+    useEffect(() => {
+        if (status !== "challenge") return;
+        if (timeLeft === null) return;
+
+        if (timeLeft === 0) {
+            setStatus("failure");
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setTimeLeft(timeLeft - 1);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [timeLeft, status]);
 
     const startChallenge = async () => {
         setStatus("loading");
@@ -15,6 +33,7 @@ export default function CaptchaShell() {
             const data =await generateChallenge(); // REAL backend call
             setChallenge(data); // store challenge data
             setStartTime(Date.now()); // Track start time
+            setTimeLeft(data.timeout);
             setStatus("challenge");
         } catch (err) {
             console.error(err);
@@ -98,7 +117,7 @@ export default function CaptchaShell() {
                                 {challenge.prompt}
                             </p>
                             <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full">
-                                <Clock className="h-3 w-3 inline mr-1" /> {challenge.timeout}s
+                                <Clock className="h-3 w-3 inline mr-1" /> {timeLeft}s
                             </span>
                         </div>
 
