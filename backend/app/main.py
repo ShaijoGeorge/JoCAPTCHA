@@ -11,6 +11,7 @@ app = FastAPI(
     version=settings.APP_VERSION
 )
 
+# Allow Frontend to talk to Backend (CORS)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,11 +20,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+assets_path = Path(__file__).resolve().parent / "assets"
 app.mount(
-    "/static",
-    StaticFiles(directory=Path(__file__).resolve().parent / "assets"),
-    name="static",
-)
+    "/assets",
+    StaticFiles(directory=assets_path), name="assets"
+),
 
 @app.on_event("startup")
 def startup_event():

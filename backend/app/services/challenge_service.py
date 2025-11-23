@@ -1,39 +1,68 @@
 import uuid
 import random
 import json
-from datetime import datetime
+import os
 from pathlib import Path
 from app.redis_client import redis_client
 
 ASSETS_PATH = Path(__file__).resolve().parent.parent / "assets" / "odd_one_out"
 
 def generate_odd_one_out_challenge():
-    # list all PNG images in folder
-    files = [f for f in ASSETS_PATH.glob("*.png")]
-    
-    # pick 5 belonging images and 1 odd image
-    belonging = files[:-1] # first 5 images
-    odd = files[-1]    # last image is odd
+    # 1. list all PNG images in folder
+    if not ASSETS_PATH.exists():
+        print(f"DEBUG: Creating missing directory at: {ASSETS_PATH}")  # <--- DEBUG 1
+        # create directory if it doesn't exist to avoid crashes
+        ASSETS_PATH.mkdir(parents=True, exist_ok=True)
+        return {"error": "Assets directory missing."}
 
-    # choose 1 odd poition
-    chosen_images = random.sample(belonging, 4) + [odd]
+    print(f"DEBUG: Looking for images in: {ASSETS_PATH}") # <--- DEBUG 2
+    files = [f.name for f in ASSETS_PATH.glob("*.png")]
+    print(f"DEBUG: Found these files: {files}")           # <--- DEBUG 3
+    
+    if len(files) < 2:
+        return {
+            "challengeId": "error",
+            "type": "error",
+            "prompt": "No images found. Please add PNGs to backend/app/assets/odd_one_out/",
+            "images": [],
+            "timeout": 20
+        }
+    
+    # 2. Select one "Odd" image
+    odd = random.choice(files)
+
+    # 3. Select 4 "Normal" images (different from odd)
+    available_normals = [f for f in files if f != odd]
+
+    if len(available_normals) >= 4:
+        normals = random.sample(available_normals, 4)
+    else:
+        normals = random.choices(available_normals, k=4)
+
+    # 4. Combine and Shuffle
+    chosen_images = [odd] + normals
     random.shuffle(chosen_images)
 
-    # find index of odd image
+    # 5. Find the correct answer (index of the odd image)
     odd_index = chosen_images.index(odd)
 
     challenge_id = str(uuid.uuid4())
 
+    # 6. Generate the response payload
     challenge_data = {
         "challengeId": challenge_id,
         "type": "odd_one_out",
         "prompt": "Tap the image that does NOT belong.",
-        "images": [f"/static/odd_one_out/{img.name}" for img in chosen_images],
-        "answer": odd_index
+        "images": [f"http://127.0.0.1:8000/assets/odd_one_out/{img}" for img in chosen_images],
+        "timeout": 20
     }
 
-    # Store in Redis with 120 second expiry
-    redis_client.setex(challenge_id, 120, json.dumps(challenge_data))
+    # 7. Store in Redis with 120 second expiry
+    redis_data = {
+        "answer": odd_index,
+        "type": "odd_one_out"
+    }
+    redis_client.setex(challenge_id, 120, json.dumps(redis_data))
     
     return challenge_data
 
