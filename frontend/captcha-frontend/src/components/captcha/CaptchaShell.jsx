@@ -1,27 +1,45 @@
 import { useState } from "react";
 import { UserCheck, Clock, ShieldCheck, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { generateChallenge, verifyChallenge } from "../../services/captchaApi";
 
 export default function CaptchaShell() {
     const [status, setStatus] = useState("idle"); // idle > loading > challenge > verifying > success/failure
-  
-    // TEMP FAKE DATA (will connect to fastapi later)
-    const fakeChallenge = {
-        prompt: "Tap the image that does NOT belong.",
-        images: [
-            "https://plaacekitten.com/90/90",
-            "https://plaacekitten.com/91/91",
-            "https://plaacekitten.com/92/92",
-            "https://plaacekitten.com/93/93",
-            "https://plaacekitten.com/94/94",
-        ],
-    };
+    const [challenge, setChallenge] = useState(null);
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [startTime, setStartTime] = useState(null);
 
-    const startChallenge = () => {
+    const startChallenge = async () => {
         setStatus("loading");
 
-        setTimeout(() => {
+        try {
+            const data =await generateChallenge(); // REAL backend call
+            setChallenge(data); // store challenge data
+            setStartTime(Date.now()); // Track start time
             setStatus("challenge");
-        }, 900);
+        } catch (err) {
+            console.error(err);
+            setStatus("failure");
+        }
+    };
+
+    const handleVerify = async () => {
+        if (selectedIndex === null) return;
+
+        setStatus("Verifying");
+
+        const timeTaken = Date.now() - startTime;
+
+        const result = await verifyChallenge({
+            challengeId: challenge.challengeId,
+            answer: selectedIndex,
+            timeTaken: timeTaken,
+        });
+
+        if (result.success) {
+            setStatus("success");
+        } else {
+            setStatus("failure");
+        }
     };
 
     const finishVerification = (success) => {
@@ -77,24 +95,41 @@ export default function CaptchaShell() {
                         <div className="flex items-center justify-between pb-2 border-b">
                             <p className="text-sm text-slate-600 font-medium flex items-center">
                                 <ShieldCheck className= "h-4 w-4 mr-2 text-indigo-500" />
-                                {fakeChallenge.prompt}
+                                {challenge.prompt}
                             </p>
                             <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full">
-                                <Clock className="h-3 w-3 inline mr-1" /> 20s
+                                <Clock className="h-3 w-3 inline mr-1" /> {challenge.timeout}s
                             </span>
                         </div>
 
                         <div className="grid grid-cols-3 gap-2 p-4 bg-slate-50 rounded-xl border">
-                            {fakeChallenge.images.map((img, idx) => (
+                            {challenge.images.map((img, idx) => (
                                 <button
                                     key={idx}
-                                    onClick={() => finishVerification(idx === 1)} // TEMP: only img #1 is correct
-                                    className="rounded-lg shadow-sm hover:shadow-md transition overflow-hidden bg-white"
+                                    onClick={() => setSelectedIndex(idx)}
+                                    className={`rounded-lg shadow-sm hover:shadow-md transition overflow-hidden bg-white border
+                                        ${selectedIndex === idx ? "ring-2 ring-indigo-500" : ""}`}
                                 >
-                                    <img src={img} alt="" className="w-full h-full object-cover" />
+                                    <img src={img} className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
+
+                        <button
+                            onClick={handleVerify}
+                            className="w-full mt-1 inline-flex items-center justify-center px-4 py-2.5 
+                                    rounded-xl bg-indigo-600 text-white text-sm font-semibold
+                                    shadow-md hover:bg-indigo-700 transition"
+                        >
+                            Submit
+                        </button>
+                    </div>
+                );
+            case "verifying":
+                return (
+                    <div className="py-10 flex flex-col items-center">
+                        <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
+                        <p className="mt-3 text-sm text-slate-600">Checking your answer...</p>
                     </div>
                 );
             case "success":
