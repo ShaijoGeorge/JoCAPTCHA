@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UserCheck, Clock, ShieldCheck, Loader2, CheckCircle2, XCircle } from "lucide-react";
-import { generateChallenge, verifyChallenge } from "../../services/captchaApi";
+import { generateChallenge, verifyChallenge, API_BASE } from "../../services/captchaApi";
 
 export default function CaptchaShell() {
     const [status, setStatus] = useState("idle"); // idle > loading > challenge > verifying > success/failure
@@ -110,7 +110,7 @@ export default function CaptchaShell() {
                                     className={`rounded-lg shadow-sm hover:shadow-md transition overflow-hidden bg-white border
                                         ${selectedIndex === idx ? "ring-2 ring-indigo-500" : ""}`}
                                 >
-                                    <img src={img} className="w-full h-full object-cover" />
+                                    <img src={`${API_BASE}${img}`} className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
