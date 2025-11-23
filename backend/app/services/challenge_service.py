@@ -10,14 +10,11 @@ ASSETS_PATH = Path(__file__).resolve().parent.parent / "assets" / "odd_one_out"
 def generate_odd_one_out_challenge():
     # 1. list all PNG images in folder
     if not ASSETS_PATH.exists():
-        print(f"DEBUG: Creating missing directory at: {ASSETS_PATH}")  # <--- DEBUG 1
         # create directory if it doesn't exist to avoid crashes
         ASSETS_PATH.mkdir(parents=True, exist_ok=True)
         return {"error": "Assets directory missing."}
 
-    print(f"DEBUG: Looking for images in: {ASSETS_PATH}") # <--- DEBUG 2
     files = [f.name for f in ASSETS_PATH.glob("*.png")]
-    print(f"DEBUG: Found these files: {files}")           # <--- DEBUG 3
     
     if len(files) < 2:
         return {
