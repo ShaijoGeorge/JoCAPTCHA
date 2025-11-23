@@ -129,7 +129,7 @@ export default function CaptchaShell() {
                                     className={`rounded-lg shadow-sm hover:shadow-md transition overflow-hidden bg-white border
                                         ${selectedIndex === idx ? "ring-2 ring-indigo-500" : ""}`}
                                 >
-                                    <img src={`${API_BASE}${img}`} className="w-full h-full object-cover" />
+                                    <img src={img} className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
