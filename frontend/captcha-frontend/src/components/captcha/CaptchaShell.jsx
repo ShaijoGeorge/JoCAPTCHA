@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { UserCheck, Clock, ShieldCheck, Loader2, CheckCircle2, XCircle } from "lucide-react";
-import { generateChallenge, verifyChallenge, API_BASE } from "../../services/captchaApi";
+import { UserCheck, Clock, ShieldCheck, Loader2, CheckCircle2, XCircle, MousePointer2 } from "lucide-react";
+import { generateChallenge, verifyChallenge } from "../../services/captchaApi";
+import OddOneOutChallenge from "./OddOneOutChallenge";
+import DragDropChallenge from "./DragDropChallenge";
 
 export default function CaptchaShell() {
     const [status, setStatus] = useState("idle"); // idle > loading > challenge > verifying > success/failure
     const [challenge, setChallenge] = useState(null);
-    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [userAnswer, setUserAnswer] = useState(null); // Stores Index (int) OR Coordinates (obj)
     const [startTime, setStartTime] = useState(null);
     const [timeLeft, setTimeLeft] = useState(null);
 
+    // Timer Logic
     useEffect(() => {
         if (status !== "challenge") return;
         if (timeLeft === null) return;
@@ -31,6 +34,14 @@ export default function CaptchaShell() {
 
         try {
             const data =await generateChallenge(); // REAL backend call
+
+            // Handle "error" from backend (e.g. empty folder)
+            if (data.error) {
+                console.error(data.error);
+                setStatus("failure");
+                return;
+            }
+
             setChallenge(data); // store challenge data
             setStartTime(Date.now()); // Track start time
             setTimeLeft(data.timeout);
@@ -42,15 +53,15 @@ export default function CaptchaShell() {
     };
 
     const handleVerify = async () => {
-        if (selectedIndex === null) return;
+        if (userAnswer === null) return;
 
-        setStatus("Verifying");
+        setStatus("verifying");
 
         const timeTaken = Date.now() - startTime;
 
         const result = await verifyChallenge({
             challengeId: challenge.challengeId,
-            answer: selectedIndex,
+            answer: userAnswer,
             timeTaken: timeTaken,
         });
 
@@ -60,10 +71,6 @@ export default function CaptchaShell() {
             setStatus("failure");
         }
     };
-
-    const finishVerification = (success) => {
-        setStatus(success ? "success" : "failure");
-    }
 
     const renderScreen = () => {
         switch (status) {
@@ -85,12 +92,12 @@ export default function CaptchaShell() {
                         </div>
 
                         <p className="text-sm text-slate-500 leading-relaxed">
-                            Complete a simple challenge designed to be easy for humans but difficult for bots.
+                            Complete a quick security check to continue.
                         </p>
 
                         <button
                             onClick={startChallenge}
-                            className="w=full mt-2 inline-flex items-center justify-center px-4 py-2.5
+                            className="w-full mt-2 inline-flex items-center justify-center px-4 py-2.5
                                     rounded-xl bg-indigo-600 text-white text-sm font-semibold
                                     shadow-lg shadow-indigo-500/30 hover:bg-indigo-700
                                     transition"
@@ -110,40 +117,50 @@ export default function CaptchaShell() {
                 );
             case "challenge":
                 return (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b">
-                            <p className="text-sm text-slate-600 font-medium flex items-center">
-                                <ShieldCheck className= "h-4 w-4 mr-2 text-indigo-500" />
-                                {challenge.prompt}
-                            </p>
-                            <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full">
-                                <Clock className="h-3 w-3 inline mr-1" /> {timeLeft}s
-                            </span>
-                        </div>
+                <div className="space-y-4">
+                    {/* Header Bar */}
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <p className="text-sm text-slate-600 font-medium flex items-center">
+                        {challenge.type === 'odd_one_out' 
+                            ? <ShieldCheck className="h-4 w-4 mr-2 text-indigo-500" />
+                            : <MousePointer2 className="h-4 w-4 mr-2 text-indigo-500" />
+                        }
+                        {challenge.prompt}
+                    </p>
+                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center
+                        ${timeLeft <= 5 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                        <Clock className="h-3 w-3 inline mr-1" /> {timeLeft}s
+                    </span>
+                </div>
 
-                        <div className="grid grid-cols-3 gap-2 p-4 bg-slate-50 rounded-xl border">
-                            {challenge.images.map((img, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setSelectedIndex(idx)}
-                                    className={`rounded-lg shadow-sm hover:shadow-md transition overflow-hidden bg-white border
-                                        ${selectedIndex === idx ? "ring-2 ring-indigo-500" : ""}`}
-                                >
-                                    <img src={img} className="w-full h-full object-cover" />
-                                </button>
-                            ))}
-                        </div>
+                    {/* DYNAMIC CHALLENGE RENDERER */}
+                    {challenge.type === "odd_one_out" && (
+                        <OddOneOutChallenge 
+                            data={challenge.data} 
+                            onSelect={(idx) => setUserAnswer(idx)} 
+                        />
+                    )}
 
-                        <button
-                            onClick={handleVerify}
-                            className="w-full mt-1 inline-flex items-center justify-center px-4 py-2.5 
-                                    rounded-xl bg-indigo-600 text-white text-sm font-semibold
-                                    shadow-md hover:bg-indigo-700 transition"
-                        >
-                            Submit
-                        </button>
-                    </div>
-                );
+                    {challenge.type === "drag_drop" && (
+                        <DragDropChallenge 
+                            data={challenge.data} 
+                            onPositionChange={(coords) => setUserAnswer(coords)} 
+                        />
+                    )}
+
+                    <button
+                        onClick={handleVerify}
+                        disabled={userAnswer === null}
+                        className={`w-full mt-2 inline-flex items-center justify-center px-4 py-2.5 
+                                    rounded-xl text-sm font-semibold transition shadow-md
+                                    ${userAnswer !== null 
+                                    ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/30" 
+                                    : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}
+                    >
+                        Submit Answer
+                    </button>
+                </div>
+            );
             case "verifying":
                 return (
                     <div className="py-10 flex flex-col items-center">
@@ -153,23 +170,33 @@ export default function CaptchaShell() {
                 );
             case "success":
                 return (
-                <div className="py-10 text-center">
-                    <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
-                    <h3 className="text-lg font-bold text-green-600 mt-3">Verification Complete</h3>
-                    <p className="text-sm text-slate-500 mt-1">You are verified as human.</p>
-                </div>
-            );
+                    <div className="py-10 text-center animate-in fade-in zoom-in duration-300">
+                        <div className="inline-flex bg-green-100 p-3 rounded-full mb-3">
+                            <CheckCircle2 className="h-8 w-8 text-green-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-800">Verified Successfully</h3>
+                        <p className="text-sm text-slate-500 mt-1">You can now proceed.</p>
+                        <button
+                            onClick={() => setStatus("idle")}
+                            className="mt-5 text-xs text-indigo-600 hover:text-indigo-800 font-medium underline"
+                        >
+                            Test Again
+                        </button>
+                    </div>
+                );
             case "failure":
                 return (
-                    <div className="py-10 text-center">
-                        <XCircle className="h-12 w-12 text-red-500 mx-auto" />
-                        <h3 className="text-lg font-bold text-red-600 mt-3">Verification Failed</h3>
-                        <p className="text-sm text-slate-500 mt-1">Try again with a new challenge.</p>
+                    <div className="py-10 text-center animate-in fade-in zoom-in duration-300">
+                        <div className="inline-flex bg-red-100 p-3 rounded-full mb-3">
+                            <XCircle className="h-8 w-8 text-red-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-800">Verification Failed</h3>
+                        <p className="text-sm text-slate-500 mt-1">Incorrect or timed out.</p>
 
                         <button
                             onClick={() => setStatus("idle")}
-                            className="mt-4 w-full inline-flex items-center justify-center px-4 py-2.5 
-                                        rounded-xl bg-indigo-600 text-white text-sm font-semibold
+                            className="mt-4 inline-flex items-center justify-center px-6 py-2 
+                                        rounded-lg bg-indigo-600 text-white text-sm font-semibold
                                         shadow-md hover:bg-indigo-700 transition"
                         >
                             Try Again
@@ -183,8 +210,10 @@ export default function CaptchaShell() {
   
   
     return (
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5 w-full">
-            {renderScreen()}
+        <div className="w-full max-w-md">
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5 transition-all">
+                {renderScreen()}
+            </div>
         </div>
     );
 }
