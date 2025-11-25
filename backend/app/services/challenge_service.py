@@ -3,6 +3,7 @@ import random
 import json
 import math
 import os
+from datetime import datetime
 from pathlib import Path
 from app.redis_client import redis_client
 
@@ -214,4 +215,11 @@ def verify_challenge(challenge_id: str, user_answer: int, time_taken: int):
         if diff > tolerance:
             return {"success": False, "reason": f"Not upright (off by {int(diff)}°)."}
         
-    return {"success": True, "reason": "Verification successful."}
+    # GENERATE TOKEN (Simulated JWT)
+    mock_token = f"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{uuid.uuid4()}.{time_taken}"
+        
+    return {"success": True,
+            "reason": "Verification successful.",
+            "token": mock_token,
+            "verified_at": str(datetime.now())
+    }

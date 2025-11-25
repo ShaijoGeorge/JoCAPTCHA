@@ -6,7 +6,7 @@ import OddOneOutChallenge from "./OddOneOutChallenge";
 import DragDropChallenge from "./DragDropChallenge";
 import RotateChallenge from "./RotateChallenge";
 
-export default function CaptchaShell() {
+export default function CaptchaShell({ onVerificationComplete }) {
     const [status, setStatus] = useState("idle"); // idle > loading > challenge > verifying > success/failure
     const [challenge, setChallenge] = useState(null);
     const [userAnswer, setUserAnswer] = useState(null); // Stores Index (int) OR Coordinates (obj)
@@ -69,6 +69,11 @@ export default function CaptchaShell() {
             answer: userAnswer,
             timeTaken: timeTaken,
         });
+
+        // 2. Call the parent callback
+        if (onVerificationComplete) {
+            onVerificationComplete(result);
+        }
 
         if (result.success) {
             setStatus("success");
