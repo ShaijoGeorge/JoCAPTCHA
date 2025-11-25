@@ -9,35 +9,50 @@ from app.redis_client import redis_client
 ASSETS_PATH = Path("app/assets/odd_one_out")
 
 def generate_odd_one_out_challenge():
-    # Helper to get all PNG files
-    all_files = []
-    # Ensure directory exists to avoid errors if empty
-    if ASSETS_PATH.exists():
-        for root, dirs, files in os.walk(ASSETS_PATH):
-            for file in files:
-                if file.endswith(".png"):
-                    # Create a relative path usable by the frontend
-                    # Assume the file is unique enough or just pick one
-                    rel_path = os.path.relpath(os.path.join(root, file), "app/assets")
-                    all_files.append(rel_path)
-    if not all_files:
-        # Fallback if folder is empty
+    # Get all subdirectories (categories)
+    categories = {}
+    
+    if not ASSETS_PATH.exists():
         return None
-
-    odd = random.choice(all_files)
-    # Ideally pick normals from a similar folder, but for now random
-    # Filter out the odd image to avoid duplicates
-    potential_normals = [f for f in all_files if f != odd]
     
-    if len(potential_normals) < 4:
-        normals = potential_normals
+    # Group images by category (subfolder)
+    for category_dir in ASSETS_PATH.iterdir():
+        if category_dir.is_dir():
+            category_name = category_dir.name
+            category_files = []
+            
+            for file in category_dir.glob("*.png"):
+                rel_path = os.path.relpath(file, "app/assets")
+                category_files.append(rel_path)
+            
+            if category_files:
+                categories[category_name] = category_files
+    
+    # Need at least 2 categories with enough images
+    if len(categories) < 2:
+        return None
+    
+    # Pick two different categories
+    category_names = list(categories.keys())
+    normal_category, odd_category = random.sample(category_names, 2)
+    
+    # Get 5 normal images from one category
+    normal_images = categories[normal_category]
+    if len(normal_images) < 5:
+        # If not enough images, use what we have
+        selected_normals = normal_images
     else:
-        normals = random.sample(potential_normals, 4)
+        selected_normals = random.sample(normal_images, 5)
     
-    images = [odd] + normals
-    random.shuffle(images)
+    # Get 1 odd image from different category
+    odd_images = categories[odd_category]
+    odd_image = random.choice(odd_images)
     
-    odd_index = images.index(odd)
+    # Combine and shuffle
+    all_images = selected_normals + [odd_image]
+    random.shuffle(all_images)
+    
+    odd_index = all_images.index(odd_image)
     challenge_id = str(uuid.uuid4())
     
 
@@ -46,7 +61,7 @@ def generate_odd_one_out_challenge():
         "type": "odd_one_out",
         "prompt": "Tap the item that does NOT belong.",
         "data": {
-            "images": [f"http://127.0.0.1:8000/assets/{img}" for img in images]
+            "images": [f"http://127.0.0.1:8000/assets/{img}" for img in all_images]
         },
         "timeout": 20
     }
