@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-from typing import List
+from typing import Any, Dict, Optional
 
 class GeneratedChallenge(BaseModel):
     challengeId: str
-    type: str
+    type: str   # "odd_one_out" OR "drag_drop"
     prompt: str
-    images: List[str]
+    data: Dict[str, Any]    # Flexible payload (images list OR coordinate data)
     timeout: int= 20

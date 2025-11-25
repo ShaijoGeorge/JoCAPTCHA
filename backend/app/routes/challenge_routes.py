@@ -1,30 +1,25 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+import random
 from app.models.verify import VerifyRequest
-from app.services.challenge_service import generate_odd_one_out_challenge, verify_challenge
+from app.services.challenge_service import generate_odd_one_out_challenge, generate_drag_drop_challenge, verify_challenge
 
-router = APIRouter(prefix="/challenge", tags=["challenge"])
+router = APIRouter()
 
-@router.get("/test")
-def test_route():
-    return {"status": "OK", "message": "Challenge route working!"}
-
-@router.get("/generate")
+@router.get("/challenge/generate")
 def generate_challenge():
-    data = generate_odd_one_out_challenge()
+    if random.random() < 0.5:
+        data = generate_odd_one_out_challenge()
+    else:
+        data = generate_drag_drop_challenge()
 
-    # do not ssend answer to frontend
-    safe_data = {
-        "challengeId": data["challengeId"],
-        "type": data["type"],
-        "prompt": data["prompt"],
-        "images": data["images"],
-        "timeout": 20
-    }
+    # If folder was empty, generate_odd_one might return None
+    if not data:
+         return JSONResponse(content={"error": "No assets found"}, status_code=500)
+        
+    return JSONResponse(content=data)
 
-    return JSONResponse(content=safe_data)
-
-@router.post("/verify")
+@router.post("/challenge/verify")
 def verify(request: VerifyRequest):
     result = verify_challenge(
         challenge_id=request.challengeId,
