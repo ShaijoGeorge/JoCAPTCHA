@@ -3,6 +3,7 @@ import React from "react";
 import Navbar from "./components/layout/Navbar";
 import CaptchaShell from "./components/captcha/CaptchaShell";
 import DebugPanel from "./components/layout/DebugPanel";
+import DocsPage from "./components/pages/DocsPage";
 
 function App() {
   const [verificationResult, setVerificationResult] = useState(null);
@@ -14,8 +15,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <Navbar />
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
+      <Navbar currentPage={page} setPage={setPage}/>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
@@ -36,6 +37,8 @@ function App() {
             <DebugPanel result={verificationResult} />
           </div>
         )}
+
+        {page === "docs" && <DocsPage />}
 
       </main>
     </div>
