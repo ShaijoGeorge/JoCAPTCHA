@@ -64,22 +64,30 @@ export default function CaptchaShell({ onVerificationComplete }) {
 
         const timeTaken = Date.now() - startTime;
 
-        const result = await verifyChallenge({
-            challengeId: challenge.challengeId,
-            answer: userAnswer,
-            timeTaken: timeTaken,
-        });
+        try {
+            const result = await verifyChallenge({
+                challengeId: challenge.challengeId,
+                answer: userAnswer,
+                timeTaken: timeTaken,
+            });
 
-        // 2. Call the parent callback
-        if (onVerificationComplete) {
-            onVerificationComplete(result);
-        }
+            console.log("Verification result:", result);
 
-        if (result.success) {
-            setStatus("success");
-        } else {
-            setMessage(result.reason || 'Incorrect');
+            // Call parent callback with result
+            if (onVerificationComplete) {
+                onVerificationComplete(result);
+            }
+
+            if (result.success) {
+                setStatus("success");
+            } else {
+                setMessage(result.reason || 'Incorrect');
+                setStatus("failure");
+            }
+        } catch (error) {
+            console.error("Verification error:", error);
             setStatus("failure");
+            setMessage("Network error");
         }
     };
 
@@ -112,14 +120,14 @@ export default function CaptchaShell({ onVerificationComplete }) {
                                     rounded-xl bg-indigo-600 text-white text-sm font-semibold
                                     shadow-lg shadow-indigo-500/30 hover:bg-indigo-700
                                     transition"
-                            >
+                        >
                             Start verification
                         </button>
                     </>
                 );
             case "loading":
                 return (
-                    <div>
+                    <div className="py-10 flex flex-col items-center">
                         <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
                         <p className="mt-3 text-sm text-slate-600">
                             Generating challenge...
@@ -128,56 +136,56 @@ export default function CaptchaShell({ onVerificationComplete }) {
                 );
             case "challenge":
                 return (
-                <div className="space-y-4">
+                    <div className="space-y-4">
                     {/* Header Bar */}
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <p className="text-sm text-slate-600 font-medium flex items-center">
-                        {challenge.type === 'odd_one_out' && <ShieldCheck className="h-4 w-4 mr-2 text-indigo-500" />}
-                        {challenge.type === 'drag_drop' && <MousePointer2 className="h-4 w-4 mr-2 text-indigo-500" />}
-                        {challenge.type === 'rotate' && <RotateCw className="h-4 w-4 mr-2 text-indigo-500" />}
-                        {challenge.prompt}
-                    </p>
-                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center
-                        ${timeLeft <= 5 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                        <Clock className="h-3 w-3 inline mr-1" /> {timeLeft}s
-                    </span>
-                </div>
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <p className="text-sm text-slate-600 font-medium flex items-center">
+                                {challenge.type === 'odd_one_out' && <ShieldCheck className="h-4 w-4 mr-2 text-indigo-500" />}
+                                {challenge.type === 'drag_drop' && <MousePointer2 className="h-4 w-4 mr-2 text-indigo-500" />}
+                                {challenge.type === 'rotate' && <RotateCw className="h-4 w-4 mr-2 text-indigo-500" />}
+                                {challenge.prompt}
+                            </p>
+                            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center
+                                ${timeLeft <= 5 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                <Clock className="h-3 w-3 inline mr-1" /> {timeLeft}s
+                            </span>
+                        </div>
 
                     {/* DYNAMIC CHALLENGE RENDERER */}
-                    {challenge.type === "odd_one_out" && (
-                        <OddOneOutChallenge 
-                            data={challenge.data} 
-                            onSelect={(idx) => setUserAnswer(idx)} 
-                        />
-                    )}
+                        {challenge.type === "odd_one_out" && (
+                            <OddOneOutChallenge 
+                                data={challenge.data} 
+                                onSelect={(idx) => setUserAnswer(idx)} 
+                            />
+                        )}
 
-                    {challenge.type === "drag_drop" && (
-                        <DragDropChallenge 
-                            data={challenge.data} 
-                            onPositionChange={(coords) => setUserAnswer(coords)} 
-                        />
-                    )}
+                        {challenge.type === "drag_drop" && (
+                            <DragDropChallenge 
+                                data={challenge.data} 
+                                onPositionChange={(coords) => setUserAnswer(coords)} 
+                            />
+                        )}
 
-                    {challenge.type === "rotate" && (
-                        <RotateChallenge 
-                            data={challenge.data} 
-                            onUpdate={(angle) => setUserAnswer(angle)} 
-                        />
-                    )}
+                        {challenge.type === "rotate" && (
+                            <RotateChallenge 
+                                data={challenge.data} 
+                                onUpdate={(angle) => setUserAnswer(angle)} 
+                            />
+                        )}
 
-                    <button
-                        onClick={handleVerify}
-                        disabled={userAnswer === null}
-                        className={`w-full mt-2 inline-flex items-center justify-center px-4 py-2.5 
+                        <button
+                            onClick={handleVerify}
+                            disabled={userAnswer === null}
+                            className={`w-full mt-2 inline-flex items-center justify-center px-4 py-2.5 
                                     rounded-xl text-sm font-semibold transition shadow-md
                                     ${userAnswer !== null 
                                     ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/30" 
                                     : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}
-                    >
-                        Submit Answer
-                    </button>
-                </div>
-            );
+                        >
+                            Submit Answer
+                        </button>
+                    </div>
+                );
             case "verifying":
                 return (
                     <div className="py-10 flex flex-col items-center">
@@ -197,6 +205,7 @@ export default function CaptchaShell({ onVerificationComplete }) {
                             onClick={() => {
                                 setStatus("idle");
                                 setMessage('');
+                                setUserAnswer(null);
                             }}
                             className="mt-5 text-xs text-indigo-600 hover:text-indigo-800 font-medium underline"
                         >
@@ -217,6 +226,7 @@ export default function CaptchaShell({ onVerificationComplete }) {
                             onClick={() => {
                                 setStatus("idle");
                                 setMessage('');
+                                setUserAnswer(null);
                             }}
                             className="mt-4 inline-flex items-center justify-center px-6 py-2 
                                         rounded-lg bg-indigo-600 text-white text-sm font-semibold

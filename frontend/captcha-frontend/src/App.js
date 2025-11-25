@@ -19,7 +19,7 @@ function App() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start">
           {/* Left: Widget card */}
-          <CaptchaShell />
+          <CaptchaShell onVerificationComplete={handleVerificationComplete} />
 
           {/* Right: Live Debug Panel */}
           <DebugPanel result={verificationResult} />
