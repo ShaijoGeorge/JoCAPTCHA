@@ -4,6 +4,7 @@ import Navbar from "./components/layout/Navbar";
 import CaptchaShell from "./components/captcha/CaptchaShell";
 import DebugPanel from "./components/layout/DebugPanel";
 import DocsPage from "./components/pages/DocsPage";
+import PlaygroundPage from "./components/pages/PlaygroundPage";
 
 function App() {
   const [verificationResult, setVerificationResult] = useState(null);
@@ -39,6 +40,8 @@ function App() {
         )}
 
         {page === "docs" && <DocsPage />}
+
+        {page === "playground" && <PlaygroundPage />}
 
       </main>
     </div>

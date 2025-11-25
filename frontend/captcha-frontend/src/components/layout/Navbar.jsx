@@ -39,7 +39,7 @@ export default function Navbar({ currentPage, setPage }) {
                         <span>Docs</span>
                     </button>
 
-                    <button className={navBtnClass("playground")}>
+                    <button onClick={() => setPage("playground")} className={navBtnClass("playground")}>
                         <Settings className="h-4 w-4" />
                         <span>Playground</span>
                     </button>
