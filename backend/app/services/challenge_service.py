@@ -42,7 +42,7 @@ def generate_odd_one_out_challenge():
     
 
     payload = {
-        "challengeId": "error",
+        "challengeId": challenge_id,
         "type": "odd_one_out",
         "prompt": "Tap the item that does NOT belong.",
         "data": {
@@ -73,8 +73,8 @@ def generate_drag_drop_challenge():
     
     # Generate a target zone (assuming a 300x200px container on frontend)
     # We leave some padding so the target isn't on the extreme edge
-    target_x = random.radient(50, 250)
-    target_y = random.radient(50, 150)
+    target_x = random.randint(50, 250)
+    target_y = random.randint(50, 150)
     tolerance = 10  # pixels radius allowed
 
     payload = {
@@ -121,7 +121,7 @@ def verify_challenge(challenge_id: str, user_answer: int, time_taken: int):
         return {"success": False, "reason": "Too fast. Bot detected."}
 
     # 2. Logic Check
-    if challenge_type != "odd_one_out":
+    if challenge_type == "odd_one_out":
         if user_answer != correct_answer:
             return {"success": False, "reason": "Incorrect Selection."}
     
