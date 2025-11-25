@@ -6,17 +6,29 @@ import os
 from pathlib import Path
 from app.redis_client import redis_client
 
-ASSETS_PATH = Path("app/assets/odd_one_out")
+BASE_ASSETS = Path("app/assets/odd_one_out")
+ANIMALS_PATH = BASE_ASSETS / "animals"
+
+def get_all_assets_recursive(path):
+    """Get all PNG files recursively from a path"""
+    files = []
+    for root, _, filenames in os.walk(path):
+        for f in filenames:
+            if f.endswith(".png"):
+                full_path = os.path.join(root, f)
+                rel_path = os.path.relpath(full_path, "app/assets")
+                files.append(rel_path)
+    return files
 
 def generate_odd_one_out_challenge():
     # Get all subdirectories (categories)
     categories = {}
     
-    if not ASSETS_PATH.exists():
+    if not BASE_ASSETS.exists():
         return None
     
     # Group images by category (subfolder)
-    for category_dir in ASSETS_PATH.iterdir():
+    for category_dir in BASE_ASSETS.iterdir():
         if category_dir.is_dir():
             category_name = category_dir.name
             category_files = []
@@ -75,8 +87,8 @@ def generate_odd_one_out_challenge():
 def generate_drag_drop_challenge():
     # Get a random image to use as the draggable item
     all_files = []
-    if ASSETS_PATH.exists():
-        for root, dirs, files in os.walk(ASSETS_PATH):
+    if BASE_ASSETS.exists():
+        for root, dirs, files in os.walk(BASE_ASSETS):
             for file in files:
                 if file.endswith(".png"):
                     rel_path = os.path.relpath(os.path.join(root, file), "app/assets")
@@ -115,6 +127,43 @@ def generate_drag_drop_challenge():
 
     return payload
 
+def generate_rotate_challenge():
+    # Generate rotate challenge - only uses animals with clear orientation
+    # Prefer animals folder
+    files = get_all_assets_recursive(ANIMALS_PATH)
+    if not files:
+        # Fallback to all assets
+        files = get_all_assets_recursive(BASE_ASSETS)
+    
+    if not files:
+        return None
+    
+    target_image = random.choice(files)
+    challenge_id = str(uuid.uuid4())
+
+    # Random start angle (30-330 degrees)
+    start_angle = random.randint(30, 330)
+
+    payload = {
+        "challengeId": challenge_id,
+        "type": "rotate",
+        "prompt": "Rotate the animal to be upright.",
+        "data": {
+            "image": f"http://127.0.0.1:8000/assets/{target_image}",
+            "start_angle": start_angle
+        },
+        "timeout": 20
+    }
+
+    # Correct answer is 0 degrees (upright) with ±20 degree tolerance
+    redis_data = {
+        "answer": 0,
+        "tolerance": 20,
+        "type": "rotate"
+    }
+    redis_client.setex(challenge_id, 120, json.dumps(redis_data))
+    
+    return payload
 
 def verify_challenge(challenge_id: str, user_answer: int, time_taken: int):
     # Fetch challenge data from Redis
@@ -155,5 +204,14 @@ def verify_challenge(challenge_id: str, user_answer: int, time_taken: int):
 
         if distance > tolerance:
             return {"success": False, "reason": f"Missed target by {int(distance - tolerance)}px."}
+     
+    elif challenge_type == "rotate":
+        # Handle circular angle difference (360° = 0°)
+        diff = abs(user_answer - correct_answer)
+        diff = min(diff, 360 - diff)  # e.g., 350° is only 10° away from 0°
+        
+        tolerance = stored_data.get("tolerance", 20)
+        if diff > tolerance:
+            return {"success": False, "reason": f"Not upright (off by {int(diff)}°)."}
         
     return {"success": True, "reason": "Verification successful."}

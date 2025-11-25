@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { UserCheck, Clock, ShieldCheck, Loader2, CheckCircle2, XCircle, MousePointer2 } from "lucide-react";
+import { UserCheck, Clock, ShieldCheck, Loader2, CheckCircle2, XCircle, MousePointer2, RotateCw } from "lucide-react";
 import { generateChallenge, verifyChallenge } from "../../services/captchaApi";
 import OddOneOutChallenge from "./OddOneOutChallenge";
 import DragDropChallenge from "./DragDropChallenge";
+import RotateChallenge from "./RotateChallenge";
 
 export default function CaptchaShell() {
     const [status, setStatus] = useState("idle"); // idle > loading > challenge > verifying > success/failure
@@ -33,6 +34,7 @@ export default function CaptchaShell() {
 
     const startChallenge = async () => {
         setMessage('');
+        setUserAnswer(null);
         setStatus("loading");
 
         try {
@@ -71,7 +73,7 @@ export default function CaptchaShell() {
         if (result.success) {
             setStatus("success");
         } else {
-            setMessage('Incorrect');
+            setMessage(result.reason || 'Incorrect');
             setStatus("failure");
         }
     };
@@ -125,10 +127,9 @@ export default function CaptchaShell() {
                     {/* Header Bar */}
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <p className="text-sm text-slate-600 font-medium flex items-center">
-                        {challenge.type === 'odd_one_out' 
-                            ? <ShieldCheck className="h-4 w-4 mr-2 text-indigo-500" />
-                            : <MousePointer2 className="h-4 w-4 mr-2 text-indigo-500" />
-                        }
+                        {challenge.type === 'odd_one_out' && <ShieldCheck className="h-4 w-4 mr-2 text-indigo-500" />}
+                        {challenge.type === 'drag_drop' && <MousePointer2 className="h-4 w-4 mr-2 text-indigo-500" />}
+                        {challenge.type === 'rotate' && <RotateCw className="h-4 w-4 mr-2 text-indigo-500" />}
                         {challenge.prompt}
                     </p>
                     <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center
@@ -149,6 +150,13 @@ export default function CaptchaShell() {
                         <DragDropChallenge 
                             data={challenge.data} 
                             onPositionChange={(coords) => setUserAnswer(coords)} 
+                        />
+                    )}
+
+                    {challenge.type === "rotate" && (
+                        <RotateChallenge 
+                            data={challenge.data} 
+                            onUpdate={(angle) => setUserAnswer(angle)} 
                         />
                     )}
 
