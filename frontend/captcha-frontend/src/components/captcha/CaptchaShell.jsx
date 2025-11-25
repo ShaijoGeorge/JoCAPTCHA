@@ -9,6 +9,7 @@ export default function CaptchaShell() {
     const [status, setStatus] = useState("idle"); // idle > loading > challenge > verifying > success/failure
     const [challenge, setChallenge] = useState(null);
     const [userAnswer, setUserAnswer] = useState(null); // Stores Index (int) OR Coordinates (obj)
+    const [message, setMessage] = useState('');
     const [startTime, setStartTime] = useState(null);
     const [timeLeft, setTimeLeft] = useState(null);
 
@@ -18,6 +19,7 @@ export default function CaptchaShell() {
         if (timeLeft === null) return;
 
         if (timeLeft === 0) {
+            setMessage('Timeout');
             setStatus("failure");
             return;
         }
@@ -30,6 +32,7 @@ export default function CaptchaShell() {
     }, [timeLeft, status]);
 
     const startChallenge = async () => {
+        setMessage('');
         setStatus("loading");
 
         try {
@@ -68,6 +71,7 @@ export default function CaptchaShell() {
         if (result.success) {
             setStatus("success");
         } else {
+            setMessage('Incorrect');
             setStatus("failure");
         }
     };
@@ -177,7 +181,10 @@ export default function CaptchaShell() {
                         <h3 className="text-lg font-bold text-slate-800">Verified Successfully</h3>
                         <p className="text-sm text-slate-500 mt-1">You can now proceed.</p>
                         <button
-                            onClick={() => setStatus("idle")}
+                            onClick={() => {
+                                setStatus("idle");
+                                setMessage('');
+                            }}
                             className="mt-5 text-xs text-indigo-600 hover:text-indigo-800 font-medium underline"
                         >
                             Test Again
@@ -191,10 +198,13 @@ export default function CaptchaShell() {
                             <XCircle className="h-8 w-8 text-red-600" />
                         </div>
                         <h3 className="text-lg font-bold text-slate-800">Verification Failed</h3>
-                        <p className="text-sm text-slate-500 mt-1">Incorrect or timed out.</p>
+                        <p className="text-sm text-slate-500 mt-1">{message}</p>
 
                         <button
-                            onClick={() => setStatus("idle")}
+                            onClick={() => {
+                                setStatus("idle");
+                                setMessage('');
+                            }}
                             className="mt-4 inline-flex items-center justify-center px-6 py-2 
                                         rounded-lg bg-indigo-600 text-white text-sm font-semibold
                                         shadow-md hover:bg-indigo-700 transition"
