@@ -5,6 +5,7 @@ import CaptchaShell from "./components/captcha/CaptchaShell";
 import DebugPanel from "./components/layout/DebugPanel";
 import DocsPage from "./components/pages/DocsPage";
 import PlaygroundPage from "./components/pages/PlaygroundPage";
+import Footer from "./components/layout/Footer";
 
 function App() {
   const [verificationResult, setVerificationResult] = useState(null);
@@ -44,6 +45,7 @@ function App() {
         {page === "playground" && <PlaygroundPage setPage={setPage} />}
 
       </main>
+      <Footer />
     </div>
   );
 }
