@@ -10,6 +10,9 @@ from app.redis_client import redis_client
 BASE_ASSETS = Path("app/assets/odd_one_out")
 ANIMALS_PATH = BASE_ASSETS / "animals"
 
+# Use the Render URL if available, otherwise localhost
+BASE_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
+
 def get_all_assets_recursive(path):
     """Get all PNG files recursively from a path"""
     files = []
@@ -74,7 +77,7 @@ def generate_odd_one_out_challenge():
         "type": "odd_one_out",
         "prompt": "Tap the item that does NOT belong.",
         "data": {
-            "images": [f"http://127.0.0.1:8000/assets/{img}" for img in all_images]
+            "images": [f"{BASE_URL}/assets/{img}" for img in all_images]
         },
         "timeout": 20
     }
@@ -110,7 +113,7 @@ def generate_drag_drop_challenge(difficulty=50):
         "type": "drag_drop",
         "prompt" :"Drag the item into the circle.",
         "data": {
-            "image" : f"http://127.0.0.1:8000/assets/{target_image}",
+            "image" : f"{BASE_URL}/assets/{target_image}",
             "target_x": target_x,
             "target_y": target_y,
             "container_width": 300,
@@ -157,7 +160,7 @@ def generate_rotate_challenge(difficulty=50):
         "type": "rotate",
         "prompt": "Rotate the animal to be upright.",
         "data": {
-            "image": f"http://127.0.0.1:8000/assets/{target_image}",
+            "image": f"{BASE_URL}/assets/{target_image}",
             "start_angle": start_angle
         },
         "timeout": 20
