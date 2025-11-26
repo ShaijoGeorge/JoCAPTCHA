@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from .config import settings
 from .redis_client import redis_test_connection
-from .routes import challenge_routes
+from .routes import challenge_routes, admin_routes
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -31,3 +31,4 @@ def startup_event():
     redis_test_connection()
 
 app.include_router(challenge_routes.router)
+app.include_router(admin_routes.router)
