@@ -85,17 +85,12 @@ def generate_odd_one_out_challenge():
     
     return payload
     
-def generate_drag_drop_challenge():
+def generate_drag_drop_challenge(difficulty=50):
     # Get a random image to use as the draggable item
-    all_files = []
-    if BASE_ASSETS.exists():
-        for root, dirs, files in os.walk(BASE_ASSETS):
-            for file in files:
-                if file.endswith(".png"):
-                    rel_path = os.path.relpath(os.path.join(root, file), "app/assets")
-                    all_files.append(rel_path)
+    files = get_all_assets_recursive(BASE_ASSETS)
     
-    target_image = random.choice(all_files) if all_files else "odd_one_out/animals/cat.png"
+    # Fallback if no files
+    target_image = random.choice(files) if files else "odd_one_out/animals/cat.png"
 
     challenge_id = str(uuid.uuid4())
     
@@ -103,7 +98,12 @@ def generate_drag_drop_challenge():
     # We leave some padding so the target isn't on the extreme edge
     target_x = random.randint(50, 250)
     target_y = random.randint(50, 150)
-    tolerance = 10  # pixels radius allowed
+
+    # --- DIFFICULTY LOGIC ---
+    # Difficulty 0  -> Tolerance 50px (Very Easy)
+    # Difficulty 50 -> Tolerance 32px (Normal)
+    # Difficulty 100 -> Tolerance 15px (Hard)
+    tolerance = int(50 - (difficulty / 100 * 35))
 
     payload = {
         "challengeId": challenge_id,
@@ -115,6 +115,7 @@ def generate_drag_drop_challenge():
             "target_y": target_y,
             "container_width": 300,
             "container_height": 200,
+            "tolerance_visual": tolerance
         },
         "timeout": 20
     }
@@ -128,7 +129,7 @@ def generate_drag_drop_challenge():
 
     return payload
 
-def generate_rotate_challenge():
+def generate_rotate_challenge(difficulty=50):
     # Generate rotate challenge - only uses animals with clear orientation
     # Prefer animals folder
     files = get_all_assets_recursive(ANIMALS_PATH)
@@ -145,6 +146,12 @@ def generate_rotate_challenge():
     # Random start angle (30-330 degrees)
     start_angle = random.randint(30, 330)
 
+    # --- DIFFICULTY LOGIC ---
+    # Difficulty 0   -> Tolerance +/- 40 degrees (Super Easy)
+    # Difficulty 50  -> Tolerance +/- 22 degrees (Normal)
+    # Difficulty 100 -> Tolerance +/- 5 degrees (Precise)
+    tolerance = int(40 - (difficulty / 100 * 35))
+
     payload = {
         "challengeId": challenge_id,
         "type": "rotate",
@@ -156,10 +163,9 @@ def generate_rotate_challenge():
         "timeout": 20
     }
 
-    # Correct answer is 0 degrees (upright) with ±20 degree tolerance
     redis_data = {
         "answer": 0,
-        "tolerance": 20,
+        "tolerance": tolerance,
         "type": "rotate"
     }
     redis_client.setex(challenge_id, 120, json.dumps(redis_data))

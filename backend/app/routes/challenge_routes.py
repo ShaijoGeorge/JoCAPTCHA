@@ -21,9 +21,11 @@ def generate_challenge():
     if settings_raw:
         settings = json.loads(settings_raw)
         enabled_types = settings.get("enabled_types", [])
+        difficulty = settings.get("difficulty", 50)
     else:
         # fallback if no settings saved yet
         enabled_types = ["odd_one_out", "drag_drop", "rotate"]
+        difficulty = 50
 
     #2 Safety check: ensure at least one type is active
     if not enabled_types:
@@ -35,9 +37,9 @@ def generate_challenge():
     if choice == "odd_one_out":
         data = generate_odd_one_out_challenge()
     elif choice == "drag_drop":
-        data = generate_drag_drop_challenge()
+        data = generate_drag_drop_challenge(difficulty)
     else:
-        data = generate_rotate_challenge()
+        data = generate_rotate_challenge(difficulty)
 
     # If folder was empty, generate_odd_one might return None
     if not data:
