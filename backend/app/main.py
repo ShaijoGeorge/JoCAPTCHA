@@ -24,7 +24,7 @@ assets_path = Path(__file__).resolve().parent / "assets"
 app.mount(
     "/assets",
     StaticFiles(directory=assets_path), name="assets"
-),
+)
 
 @app.on_event("startup")
 def startup_event():
