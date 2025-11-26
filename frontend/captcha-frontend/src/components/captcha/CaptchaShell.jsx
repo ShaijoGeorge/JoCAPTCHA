@@ -244,7 +244,14 @@ export default function CaptchaShell({ onVerificationComplete }) {
   
     return (
         <div className="w-full max-w-md">
-            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5 transition-all">
+            {/* Added 'relative' class here to allow absolute positioning inside */}
+            <div className="relative bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5 transition-all">
+                
+                {/* Version Badge - Top Right Corner */}
+                <span className="absolute top-2 right-3 text-[10px] text-slate-400 font-mono select-none">
+                    v0.1.0
+                </span>
+
                 {renderScreen()}
             </div>
         </div>
