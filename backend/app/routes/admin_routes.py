@@ -14,7 +14,7 @@ def get_settings():
         return json.loads(data)
     
     # Return defaults if nothing saved
-    return CaptchaSettings
+    return CaptchaSettings()
 
 @router.post("/admin/settings")
 def set_settings(settings: CaptchaSettings):

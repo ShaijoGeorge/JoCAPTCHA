@@ -30,7 +30,7 @@ def generate_challenge():
         enabled_types = ["odd_one_out"]
 
     #3 Randomly pick one of the enabled challenge types
-    choice = random.choice([enabled_types])
+    choice = random.choice(enabled_types)
 
     if choice == "odd_one_out":
         data = generate_odd_one_out_challenge()
