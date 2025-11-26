@@ -41,7 +41,7 @@ function App() {
 
         {page === "docs" && <DocsPage />}
 
-        {page === "playground" && <PlaygroundPage />}
+        {page === "playground" && <PlaygroundPage setPage={setPage} />}
 
       </main>
     </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Settings, Save, Loader2, CheckCircle } from "lucide-react";
 import { getSettings, saveSettings } from "../../services/captchaApi";
 
-export default function PlaygroundPage() {
+export default function PlaygroundPage({ setPage }) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [successMsg, setSuccessMsg] = useState("");
@@ -109,21 +109,32 @@ export default function PlaygroundPage() {
                     ))}
                 </div>
 
-                {/* Save Button */}
-                <div className="space-y-3">
+                {/* Save & Test Section */}
+                <div className="pt-4 border-t border-slate-100 flex flex-col space-y-3">
+                    
                     <button 
                         onClick={handleSave}
                         disabled={saving}
-                        className="w-full py-3 bg-slate-900 text-white rounded-xl font-semibold text-sm hover:bg-slate-800 transition flex items-center justify-center space-x-2"
+                        className="w-full py-3 bg-slate-900 text-white rounded-xl font-semibold text-sm hover:bg-slate-800 transition flex items-center justify-center space-x-2 shadow-lg shadow-slate-200"
                     >
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         <span>{saving ? "Saving..." : "Save Configuration"}</span>
                     </button>
                 
+                    {/* Success Message & Redirect Action */}
                     {successMsg && (
-                        <div className="flex items-center justify-center space-x-2 text-emerald-600 text-sm bg-emerald-50 p-2 rounded-lg animate-in fade-in">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>{successMsg}</span>
+                        <div className="animate-in fade-in slide-in-from-top-2 space-y-3 text-center">
+                            <div className="flex items-center justify-center space-x-2 text-emerald-600 text-sm bg-emerald-50 p-2 rounded-lg border border-emerald-100">
+                                <CheckCircle className="w-4 h-4" />
+                                <span>{successMsg}</span>
+                            </div>
+
+                            <button
+                                onClick={() => setPage("demo")}
+                                className="text-indigo-600 text-sm font-semibold hover:text-indigo-800 hover:underline transition flex items-center justify-center mx-auto"
+                            >
+                                Go to Demo to Test Changes &rarr;
+                            </button>
                         </div>
                     )}
                 </div>
