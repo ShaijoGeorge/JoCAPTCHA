@@ -7,7 +7,7 @@ export default function Footer() {
             
             {/* Left: Copyright */}
             <div className="text-center md:text-left">
-                <p className="font-semibold text-slate-600">JoCAPTCHA</p>
+                <p className="font-extrabold text-slate-600">JoCAPTCHA</p>
                 <p className="text-xs mt-1 opacity-75">
                     &copy; {new Date().getFullYear()} Open Source
                 </p>

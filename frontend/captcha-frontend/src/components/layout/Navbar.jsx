@@ -21,7 +21,7 @@ export default function Navbar({ currentPage, setPage }) {
                         <span className="text-[10px] font-bold tracking-wider text-indigo-600 uppercase">
                             Human Verification
                         </span>
-                        <span className="text-base font-bold text-slate-900 leading-none">
+                        <span className="text-base font-extrabold text-slate-900 leading-none">
                             JoCAPTCHA
                         </span>
                     </div>
