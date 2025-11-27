@@ -151,27 +151,29 @@ export default function CaptchaShell({ onVerificationComplete }) {
                             </span>
                         </div>
 
-                    {/* DYNAMIC CHALLENGE RENDERER */}
-                        {challenge.type === "odd_one_out" && (
-                            <OddOneOutChallenge 
-                                data={challenge.data} 
-                                onSelect={(idx) => setUserAnswer(idx)} 
-                            />
-                        )}
+                        {/* CHALLENGE RENDERER - Wrapped in overflow container for mobile safety */}
+                        <div className="w-full overflow-x-auto pb-2">
+                            {challenge.type === "odd_one_out" && (
+                                <OddOneOutChallenge 
+                                    data={challenge.data} 
+                                    onSelect={(idx) => setUserAnswer(idx)} 
+                                />
+                            )}
 
-                        {challenge.type === "drag_drop" && (
-                            <DragDropChallenge 
-                                data={challenge.data} 
-                                onPositionChange={(coords) => setUserAnswer(coords)} 
-                            />
-                        )}
+                            {challenge.type === "drag_drop" && (
+                                <DragDropChallenge 
+                                    data={challenge.data} 
+                                    onPositionChange={(coords) => setUserAnswer(coords)} 
+                                />
+                            )}
 
                         {challenge.type === "rotate" && (
-                            <RotateChallenge 
-                                data={challenge.data} 
-                                onUpdate={(angle) => setUserAnswer(angle)} 
-                            />
-                        )}
+                                <RotateChallenge 
+                                    data={challenge.data} 
+                                    onUpdate={(angle) => setUserAnswer(angle)} 
+                                />
+                            )}
+                        </div>
 
                         <button
                             onClick={handleVerify}
@@ -244,8 +246,7 @@ export default function CaptchaShell({ onVerificationComplete }) {
   
     return (
         <div className="w-full max-w-md">
-            {/* Added 'relative' class here to allow absolute positioning inside */}
-            <div className="relative bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5 transition-all">
+            <div className="relative bg-white rounded-2xl shadow-xl border border-slate-100 p-4 sm:p-6 space-y-5 transition-all">
                 
                 {/* Version Badge - Top Right Corner */}
                 <span className="absolute top-2 right-3 text-[10px] text-slate-400 font-mono select-none">

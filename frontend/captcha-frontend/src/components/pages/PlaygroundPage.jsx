@@ -55,7 +55,7 @@ export default function PlaygroundPage({ setPage }) {
 
     return (
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="p-6 border-b border-slate-100 flex items-center space-x-3">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center space-x-3">
                 <div className="bg-indigo-600 p-2 rounded-lg">
                     <Settings className="w-5 h-5 text-white" />
                 </div>
@@ -65,7 +65,7 @@ export default function PlaygroundPage({ setPage }) {
                 </div>
             </div>
         
-            <div className="p-8 space-y-8">
+            <div className="p-4 sm:p-8 space-y-8">
             
                 {/* Difficulty Slider */}
                 <div className="space-y-3">
@@ -94,7 +94,7 @@ export default function PlaygroundPage({ setPage }) {
                         { id: "drag_drop", label: "Drag & Drop", color: "bg-amber-500" },
                         { id: "rotate", label: "Rotate", color: "bg-emerald-500" }
                     ].map((task) => (
-                        <div key={task.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition">
+                        <div key={task.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition cursor-pointer" onClick={() => handleToggle(task.id)}>
                             <div className="flex items-center space-x-3">
                                 <div className={`w-2 h-2 rounded-full ${task.color}`}></div>
                                 <span className="text-sm text-slate-600 font-medium">{task.label}</span>
@@ -102,7 +102,7 @@ export default function PlaygroundPage({ setPage }) {
                             <input 
                                 type="checkbox" 
                                 checked={enabledTypes.includes(task.id)}
-                                onChange={() => handleToggle(task.id)}
+                                readOnly
                                 className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" 
                             />
                         </div>

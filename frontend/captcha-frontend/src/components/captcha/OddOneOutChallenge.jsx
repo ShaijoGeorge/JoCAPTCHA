@@ -12,7 +12,7 @@ export default function OddOneOutChallenge({ data, onSelect }) {
     const images = data?.images || [];
 
     return (
-        <div className ="grid grid-cols-3 gap-2 p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <div className ="grid grid-cols-3 gap-2 p-2 sm:p-4 bg-slate-50 rounded-xl border border-slate-200">
             {images.map((img, idx) => (
                 <button
                     key={idx}

@@ -61,7 +61,7 @@ export default function DragDropChallenge({ data, onPositionChange }) {
     return (
         <div 
         ref={containerRef}
-        className="relative w-full h-[200px] bg-slate-100 rounded-xl border-2 border-slate-200 overflow-hidden shadow-inner"
+        className="relative w-full min-w-[300px] h-[200px] bg-slate-100 rounded-xl border-2 border-slate-200 overflow-hidden shadow-inner touch-none"
         >
         {/* Target Zone (Circle) */}
         <div 

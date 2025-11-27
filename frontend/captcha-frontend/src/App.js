@@ -20,7 +20,7 @@ function App() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
       <Navbar currentPage={page} setPage={setPage}/>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 py-6 sm:py-10">
         
         {/* Page Routing Logic */}
         {page === "demo" && (
@@ -36,6 +36,7 @@ function App() {
             </div>
 
             {/* Right: Debug Panel */}
+            {/* On mobile, this will stack below the captcha */}
             <DebugPanel result={verificationResult} />
           </div>
         )}

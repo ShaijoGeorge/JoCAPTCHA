@@ -2,7 +2,7 @@ import { Terminal, Database, Shield, Activity } from "lucide-react";
 
 export default function DebugPanel({ events, result }) {
     return (
-        <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col h-full min-h-[500px]">
+        <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col h-full min-h-[400px] sm:min-h-[500px]">
             {/* Header */}
             <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -17,7 +17,7 @@ export default function DebugPanel({ events, result }) {
             </div>
 
         {/* Content Area */}
-        <div className="p-5 space-y-6 overflow-y-auto custom-scrollbar font-mono text-xs">
+        <div className="p-3 sm:p-5 space-y-6 overflow-y-auto custom-scrollbar font-mono text-xs">
             
             {/* Section 1: Live Status */}
             <div className="space-y-2">

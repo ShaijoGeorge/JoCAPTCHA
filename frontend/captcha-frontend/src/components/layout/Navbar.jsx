@@ -28,20 +28,20 @@ export default function Navbar({ currentPage, setPage }) {
                 </div>
 
                 {/* Right: Nav buttons */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                     <button onClick={() => setPage("demo")} className={navBtnClass("demo")}>
                         <PlayCircle className="w-4 h-4" />
-                        <span>Demo</span>
+                        <span className="hidden sm:inline">Demo</span>
                     </button>
 
                     <button onClick={() => setPage("docs")} className={navBtnClass("docs")}>
                         <FileText className="w-4 h-4" />
-                        <span>Docs</span>
+                        <span className="hidden sm:inline">Docs</span>
                     </button>
 
                     <button onClick={() => setPage("playground")} className={navBtnClass("playground")}>
                         <Settings className="h-4 w-4" />
-                        <span>Playground</span>
+                        <span className="hidden sm:inline">Playground</span>
                     </button>
                 </div>
             </div>
